@@ -63,7 +63,7 @@ torch.cuda.manual_seed_all(seed)
 #torch.backends.cudnn.deterministic=True # warning, slower
 
 # create pytorch data object with dfp dataset
-data = dataset.TurbDataset(prop, dataDir="/home/liwei/Simulations/cfl3d_TestCases/Z08_transonic/BASIC_data_coordinates_final_metricsAll_1940/train_avg/", dataDirTest="../../BASIC_data_coordinates_final_metricsAll_1940/test_avg/", shuffle=1)
+data = dataset.TurbDataset(prop, dataDir="./BASIC_data_coordinates_final_metricsAll_1940/train_avg/", dataDirTest="./BASIC_data_coordinates_final_metricsAll_1940/test_avg/", shuffle=1)
 
 trainLoader = DataLoader(data, batch_size=batch_size, shuffle=True, drop_last=True)
 print("Training batches: {}".format(len(trainLoader)))

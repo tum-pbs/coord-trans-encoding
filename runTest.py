@@ -29,10 +29,9 @@ if len(sys.argv)>1:
 expo = 7
 prop=[1000,0.75,0,0.25] # mix data from multiple directories
 
-dataset = TurbDataset(None, mode=TurbDataset.TEST, dataDir="../../BASIC_data_coordinates_final_metricsAll/train_avg/", dataDirTest="../../BASIC_data_coordinates_final_metricsAll/test_avg/")
+dataset = TurbDataset(None, mode=TurbDataset.TEST, dataDir="./BASIC_data_coordinates_final_metricsAll_1940/train_avg/", dataDirTest="./BASIC_data_coordinates_final_metricsAll_1940/test_avg/")
 #dataset = TurbDataset(None, mode=TurbDataset.TEST, dataDir="../../BASIC_data_coordinates_final_metricsAll/train_avg/", dataDirTest="../../BASIC_data_coordinates_final_metricsAll/test_avg_clean/")
 #def __init__(self, dataProp=None, mode=TRAIN, dataDir="../data/train/", dataDirTest="../data/test/", shuffle=0, normMode=0):
-#dataset = TurbDataset(prop, mode=TurbDataset.TEST, dataDir="/home/liwei/data/train/", dataDirTest="/home/liwei/data/test/")
 DEBUG_LIWEI = False
 
 testLoader = DataLoader(dataset, batch_size=1, shuffle=False)

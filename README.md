@@ -6,17 +6,53 @@ Additional information: [project page](https://ge.in.tum.de/2021/09/07/high-accu
 ## Abstract:
 The present study investigates the accurate inference of Reynolds-averaged Navier-Stokes solutions for the compressible flow over aerofoils in two dimensions with a deep neural network. Our approach yields networks that learn to generate precise flow fields for varying body-fitted, structured grids by providing them with an encoding of the corresponding mapping to a canonical space for the solutions. We apply the deep neural network model to a benchmark case of incompressible flow at randomly given angles of attack and Reynolds numbers and achieve an improvement of more than an order of magnitude compared to previous work. Further, for transonic flow cases, the deep neural network model accurately predicts complex flow behaviour at high Reynolds numbers, such as shock wave/boundary layer interaction, and quantitative distributions like pressure coefficient, skin friction coefficient as well as wake total pressure profiles downstream of aerofoils. The proposed deep learning method significantly speeds up the predictions of flow fields and shows promise for enabling fast aerodynamic designs.
 
-# Tutorial
+# Data Generation
 
 **Requirements**
 
-- [CFL3D Version 6.7](https://nasa.github.io/CFL3D/) for data generation. [Source code](https://github.com/NASA/CFL3D)
+- [CFL3D Version 6.7](https://nasa.github.io/CFL3D/) for data generation. The official source code is [here](https://github.com/NASA/CFL3D), but we have [our own repo with some changes](https://github.com/Hypersonichen/CFL3D).
 - [Construct2D](https://sourceforge.net/projects/construct2d/)
 - [PyTorch](https://pytorch.org/) *tested with "1.6.0", with "1.10.2", with "1.11.0+cu113"*. We recommend installing via conda, e.g., with `conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch`. 
 
-**Data Generation**
 
-*** BASIC_data_coordinates_final_metricsAll ***
+**Mesh Generation**
+
+`cd mesh_generation`
+
+`tar -xvf gen_airfoils.tar.gz`
+
+`gfortran conv_for_cfl3d_plot3d.f90 -o conv_for_cfl3d_plot3d`
+
+`gfortran conv_metric_to_p3d.f90 -o conv_metric_to_p3d`
+
+Then, modify Line #11 in "Step-1_script_meshing_v2.sh" with the correct path (where construct2d is installed).
+
+Step 1:
+`./Step-1_script_meshing_v2.sh` 
+(Note: the script calls "construct2d". It might take minutes generating 1500 mesh files. According to the data files for airfoil coordinates, if the training edge is sharp, the script generates C-type grids; if blunt, it writes O-type grids. The output files are *.p3d, *_stats.p3d and *.nmf files.)
+
+Step 2:
+`mkdir o-mesh_raw`
+
+`./Step-2_check_otype.sh` (Note: this step checks o-type mesh files, and moved those into the folder "o-mesh_raw".)
+
+Step 3:
+`./Step-3_conv_for_cfl3d_plot3dgrid.sh` (Note: because "construct2d" uses ASCII plot3d format, we need to translate the ASCII files into unformated binary format for NASA's cfl3d code. We only need *.bin files for the simulation. If one wants to save storage, one can only keep *bin.)
+
+
+Step 4: (to be updated)
+
+**Run CFL3D**
+
+
+# Training
+
+We recommend using the pre-generated data for training.
+- [Training set](https://drive.google.com/file/d/16z1ZL60yWyVfyvFU8Uq3SMVfMHEQkGJ_/view?usp=sharing) 2.24Gb. There are 970 airfoils and each airfoil case has two flow conditions, so totally we have 1940 flowfields.
+- [Test set](https://drive.google.com/file/d/1fCYnhxfXicwxtlivItU6VJ_ltcuD51FI/view?usp=sharing) 23.7Mb. There are 20 airfoils that haven't been seen in the training set; each has one flow condition, and totally we have 20 flowfields.
+
+Download and extract the data. Then, make sure the sub-folders "train_avg" and "test_avg" are under the folder "BASIC_data_coordinates_final_metricsAll_1940".
+
 
 # Closing Remarks
 
