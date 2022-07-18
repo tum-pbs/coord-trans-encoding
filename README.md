@@ -37,7 +37,7 @@ Step 2:
 `./Step-2_check_otype.sh` (Note: this step checks o-type mesh files, and moved those into the folder "o-mesh_raw".)
 
 Step 3:
-`./Step-3_conv_for_cfl3d_plot3dgrid.sh` (Note: because "construct2d" uses ASCII plot3d format, we need to translate the ASCII files into unformated binary format for NASA's cfl3d code. We only need *.bin files for the simulation. If one wants to save storage, one can only keep *bin.)
+`./Step-3_conv_for_cfl3d_plot3dgrid.sh` (Note: because "construct2d" uses ASCII plot3d format, we need to translate the ASCII files into unformated binary format for NASA's cfl3d code. We only need *.bin files for the simulation.)
 
 
 Step 4: (to be updated)
@@ -48,11 +48,22 @@ Step 4: (to be updated)
 # Training
 
 We recommend using the pre-generated data for training.
-- [Training set](https://drive.google.com/file/d/16z1ZL60yWyVfyvFU8Uq3SMVfMHEQkGJ_/view?usp=sharing) 2.24Gb. There are 970 airfoils and each airfoil case has two flow conditions, so totally we have 1940 flowfields.
+- [Training set](https://drive.google.com/file/d/16z1ZL60yWyVfyvFU8Uq3SMVfMHEQkGJ_/view?usp=sharing) 2.24Gb. There are 970 airfoils and each airfoil case has two randomly-selected flow conditions, so totally we have 1940 flowfields.
 - [Test set](https://drive.google.com/file/d/1fCYnhxfXicwxtlivItU6VJ_ltcuD51FI/view?usp=sharing) 23.7Mb. There are 20 airfoils that haven't been seen in the training set; each has one flow condition, and totally we have 20 flowfields.
 
 Download and extract the data. Then, make sure the sub-folders "train_avg" and "test_avg" are under the folder "BASIC_data_coordinates_final_metricsAll_1940".
 
+`nohup python runTrain.py > output.log` (Note: in Line 33 of "runTrain.py", if we use "expo=7", the number of trainable parameters is 30928388. Training runs 1290 epochs.)
+
+One can also download the trained model as well as *pickle files [here](https://drive.google.com/file/d/1E7QC5BtwF0EI0r6OaUvB5qzDTLBLJwS2/view?usp=sharing), the random seed used in the model is "2125985365".
+
+# Testing
+
+Extract the "test_mesh.tar.gz".
+
+`python cp_subplots.py`
+
+`python skinfriction_subplots.py`
 
 # Closing Remarks
 

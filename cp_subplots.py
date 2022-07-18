@@ -1,0 +1,388 @@
+
+
+# Python packages
+import random, os, sys, datetime
+import time  as sys_time
+import numpy as np
+from matplotlib import pyplot as plt
+import skfmm
+#import  importlib.util
+#sys.path.append(os.path.abspath(os.path.join(os.getcwd(), './../')))
+from scipy import spatial
+from skimage.util.shape import view_as_windows
+from scipy import interpolate
+import pickle
+
+
+# Pytorch imports
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.autograd import Variable
+import torch.nn.modules.loss as Loss 
+import torch.nn.functional as F
+
+# Helpers Import
+
+from torch.utils.data         import DataLoader
+#--------- Project Imports ----------#
+from DfpNet             import TurbNetG
+from dataset            import TurbDataset
+import utils
+from utils import log
+
+################################################################################
+#
+# Function to read grid
+#
+################################################################################
+def read_grid(fname):
+
+# Open grid file
+  f = open(fname)
+
+# Read imax, jmax
+# 3D grid specifies number of blocks on top line
+  line1 = f.readline()
+  flag = len(line1.split())
+  if flag == 1:
+    threed = True
+  else:
+    threed = False
+
+  if threed:
+    line1 = f.readline()
+    imax, kmax, jmax = [int(x) for x in line1.split()]
+  else:
+    imax, jmax = [int(x) for x in line1.split()]
+    kmax = 1
+
+# Read geometry data
+  x = np.zeros((imax,jmax))
+  y = np.zeros((imax,jmax))
+  if threed:
+    for j in range(0, jmax):
+      for k in range(0, kmax):
+        for i in range(0, imax):
+          x[i,j] = float(f.readline())
+    for j in range(0, jmax):
+      for k in range(0, kmax):
+        for i in range(0, imax):
+          dummy = float(f.readline())
+    for j in range(0, jmax):
+      for k in range(0, kmax):
+        for i in range(0, imax):
+          y[i,j] = float(f.readline())
+  else:
+    for j in range(0, jmax):
+      for i in range(0, imax):
+        x[i,j] = float(f.readline())
+
+    for j in range(0, jmax):
+      for i in range(0, imax):
+        y[i,j] = float(f.readline())
+
+# Print message
+  print('Successfully read grid file ' + fname)
+
+# Close the file
+  f.close
+
+  return (imax, jmax, kmax, x, y, threed)
+
+
+#files=[]
+TEST_DEBUG=True
+#liwei_plt_cm = plt.cm.magma
+liwei_plt_cm = plt.cm.jet
+#liwei_plt_cm = plt.cm.Spectral
+error_plt_cm = plt.cm.magma
+##folder="./test/"
+#files = os.listdir(folder)
+#files.sort()
+#
+
+def main():
+
+
+    folder="./BASIC_data_coordinates_final_metricsAll_1940/test_avg/"
+    #folder="../../BASIC_data_coordinates_final_v3/test/"
+    files = os.listdir(folder)
+    files.sort()
+    
+    #files.append("naca0012_50_221_945.npz")
+
+
+    modelPath="./"
+    channelExpo=7
+    modelName = "modelG"
+    cuda = torch.device('cuda') # Default CUDA device
+    
+    
+    with open(modelPath+'/max_inputs.pickle', 'rb') as f: max_inputs = pickle.load(f)
+    f.close()
+    with open(modelPath+'/max_targets.pickle', 'rb') as f: max_targets = pickle.load(f)
+    f.close()
+    print("## max inputs  ##: ",max_inputs) 
+    print("## max targets ##: ",max_targets) 
+    with open(modelPath+'/min_inputs.pickle', 'rb') as f: min_inputs = pickle.load(f)
+    f.close()
+    with open(modelPath+'/min_targets.pickle', 'rb') as f: min_targets = pickle.load(f)
+    f.close()
+    print("## min inputs  ##: ",min_inputs) 
+    print("## min targets ##: ",min_targets) 
+    
+    nsteps = 4
+    max_targets = np.asarray(max_targets) 
+    min_targets = np.asarray(min_targets) 
+    ###############################################################################
+    netG = TurbNetG(channelExponent=channelExpo)
+    netG.load_state_dict( torch.load(modelPath+'/'+modelName, map_location='cpu') )
+    #if torch.cuda.is_available:
+    netG.cuda()
+    netG.eval()
+#plt.figure()
+    start_time_main_loop = sys_time.time()
+#for it in range(0, 1):
+    for n in range(len(files)):
+#        n= it
+        data=np.load(folder+files[n])['a']
+        basename = files[n].split("_")[0]
+        print(basename)
+#test_mesh_folder = "../../DATASET/test_mesh/"
+#        imax, jmax, kmax, x, y, threed = read_grid(test_mesh_folder+basename+".p3d")
+        test_mesh_folder = "./test_mesh/"
+        imax, jmax, kmax, x, y, threed = read_grid(test_mesh_folder+basename+".p3d")
+        xmach    = data[0,:,:]
+        aoa    = data[1,:,:]
+        re     = data[2,:,:]
+        si4    = data[3]
+        sj1    = data[4,:,:]
+        sj3    = data[5,:,:]
+        sj4    = data[6]
+        sk1    = data[7,:,:]
+        sk3    = data[8,:,:]
+        sk4    = data[9]
+        xin    = data[14,:,:]
+        yin    = data[15,:,:]
+
+        p_data = data[13,:,:]**2 * data[10,:,:] / 1.4
+
+
+        xm_inf  = xmach[0,0]
+        aoa_inf =   aoa[64,-1]
+        re_inf  =  re[0,0]
+        #rho_inf = np.mean(data[10,:,-1]) #rho
+        #p_inf   = np.mean(p_data[:,-1])
+        print("Reynolds & Mach number:",re_inf, xm_inf)
+
+        mach_data = np.sqrt(data[11]**2+data[12]**2)/data[13]
+        pt_data = p_data*(1+0.2*mach_data**2)**3.5
+        p_inf   = np.sum(p_data[:,-1]*sk4[:,-1])/np.sum(sk4[:,-1])
+        pt_inf   = np.sum(pt_data[:,-1]*sk4[:,-1])/np.sum(sk4[:,-1])
+        rho_inf   = np.sum(data[10,:,-1]*sk4[:,-1])/np.sum(sk4[:,-1])
+        print(p_inf, pt_inf)
+        
+
+        data[13,:,:] = p_data[:,:]
+
+        #u_inf   = data[11,64,-1] #u
+        #v_inf   = data[12,64,-1] #v
+        a_inf   = np.mean(data[13,:,-1]) #a
+  
+        #xm_inf  = (u_inf**2+v_inf**2)**0.5/a_inf
+        #re_inf  =    re[64,-1]
+
+        xmach   = torch.from_numpy(xmach).type(torch.FloatTensor).cuda()
+        aoa   = torch.from_numpy(aoa).type(torch.FloatTensor).cuda()
+        re    = torch.from_numpy(re).type(torch.FloatTensor).cuda()
+        si4    = torch.from_numpy(si4).type(torch.FloatTensor).cuda()
+        sj1    = torch.from_numpy(sj1).type(torch.FloatTensor).cuda()
+        sj3    = torch.from_numpy(sj3).type(torch.FloatTensor).cuda()
+        sj4    = torch.from_numpy(sj4).type(torch.FloatTensor).cuda()
+        sk1    = torch.from_numpy(sk1).type(torch.FloatTensor).cuda()
+        sk3    = torch.from_numpy(sk3).type(torch.FloatTensor).cuda()
+        sk4    = torch.from_numpy(sk4).type(torch.FloatTensor).cuda()
+
+        xin   = torch.from_numpy(xin).type(torch.FloatTensor).cuda()
+        yin   = torch.from_numpy(yin).type(torch.FloatTensor).cuda()
+
+        xmach  =(xmach- min_inputs[0])/(max_inputs[0]-min_inputs[0]+1e-20)
+        aoa  = (   aoa- min_inputs[1])/(max_inputs[1]-min_inputs[1])
+        re =   (    re- min_inputs[2])/(max_inputs[2]-min_inputs[2]) #/100 #.... fsX=10
+        si4 =    ( si4- min_inputs[3])/(max_inputs[3]-min_inputs[3]) #/100 #.... fsX=10
+        sj1    =( sj1 - min_inputs[4])/(max_inputs[4]-min_inputs[4])
+        sj3    =( sj3 - min_inputs[5])/(max_inputs[5]-min_inputs[5])
+        sj4    =( sj4 - min_inputs[6])/(max_inputs[6]-min_inputs[6])
+        sk1    =( sk1 - min_inputs[7])/(max_inputs[7]-min_inputs[7])
+        sk3     =(sk3 - min_inputs[8])/(max_inputs[8]-min_inputs[8])
+        sk4     =(sk4 - min_inputs[9])/(max_inputs[9]-min_inputs[9])
+        xin     =(xin - min_inputs[10])/(max_inputs[10]-min_inputs[10])
+        yin     =(yin - min_inputs[11])/(max_inputs[11]-min_inputs[11])
+
+
+
+
+
+
+
+#        print(max_inputs)
+#print(xmach[0,0].item(), aoa[0,0].item(), re[0,0].item())
+
+
+
+        #input_gpu = torch.from_numpy(input).cuda()
+
+        input_gpu = torch.cat( (xmach, aoa, re, si4, sj1, sj3, sj4, sk1, sk3, sk4, xin, yin) )
+        input_gpu = input_gpu.view((1, 12, aoa.shape[0], aoa.shape[1]))
+
+        #input = np.zeros((1, 3, binaryMaskInv.shape[0],binaryMaskInv.shape[1]))
+        ##input[0, 0:,] = channelfsX
+        ##input[0, 1:,] = channelfsY
+        ##input[0, 2:,] = binaryMaskInv
+        #input[0, 0,] = channelfsX
+        #input[0, 1,] = channelfsY
+        #input[0, 2,] = binaryMaskInv
+           #input      = self._getInputArray(numpyMask)                                                                
+        #plt.figure()
+        #plt.imshow(channelfsX.detach().cpu().numpy()) #, levels)
+        #plt.figure()
+        #plt.imshow(channelfsY.detach().cpu().numpy()) #, levels)
+        #plt.show()
+        
+#        if TEST_DEBUG: 
+#            for i in range(3):
+#                plt.subplot(1,3, i+1)
+#                plt.imshow(input_gpu[0][i].detach().cpu().numpy()) 
+#                # as it is a variable that requires grad, need to detach(); also cannot convert a cuda var to numpy
+#                plt.colorbar()
+#            plt.show()
+
+
+
+        #fullSolution = netG(torch.Tensor(input)).detach().numpy()
+        fullSolution = netG(input_gpu)
+
+        fullSolution = fullSolution.detach().cpu().numpy()
+        for i in range(4):
+            fullSolution[0][i] = fullSolution[0][i]*(max_targets[i]-min_targets[i])+min_targets[i]
+
+        p_Solution   = fullSolution[0][3]**2 * (fullSolution[0][0]) / 1.4
+        fullSolution[0][3] = p_Solution
+   
+        #plt.subplot(1,1,1,aspect=1.) 
+        #plt.figure() 
+        fig, ax = plt.subplots()
+        fig.set_size_inches(6,4)
+        #if False:
+        #    i = 3
+        #    vmin=np.min(data[i+10])
+        #    vmax=np.max(data[i+10])
+        #    lv = np.r_[vmin: vmax: 9j*5]
+        #    plt.subplot(1,1, 1, aspect=1.)
+        #    plt.contourf(x, y, data[i+10], lv, cmap=liwei_plt_cm)
+
+        #    plt.xlim(-0.5,1.5)
+        #    plt.ylim(-0.5,1.5)
+        #    plt.colorbar(ticks=lv[0::nsteps])
+
+        kw = 0
+        jsta=25 #26 # node point 25 to 105
+        jend=104
+        #plt.plot(x[jsta:jend,kw],    (fullSolution[0,3,jsta:jend,kw]-p_inf)/0.5/xm_inf/xm_inf/rho_inf, "k-")
+        #plt.scatter(x[jsta:jend,kw], (          p_data[jsta:jend,kw]-p_inf)/0.5/xm_inf/xm_inf/rho_inf, s=80, facecolors='none', edgecolors='r')
+        plt.plot(x[jsta:jend,kw], (fullSolution[0,3,jsta:jend,kw]-p_inf)/(pt_inf-p_inf), "r-", label="DNN")
+        plt.scatter(x[jsta:jend,kw], (       p_data[jsta:jend,kw]-p_inf)/(pt_inf-p_inf), s=80, facecolors='none', edgecolors='k', label="CFD")
+
+        ax.set_xlim(-0.1,1.1)
+        ax.set_ylim(-2,2)
+        #plt.gca().invert_yaxis()
+        if aoa_inf>0:
+            ax.invert_yaxis()
+        sup_name = files[n].split("_")
+        ax.set_title(sup_name[0]+", Ma="+ str(float(sup_name[1])/100)+", AoA="+str(float(sup_name[2])/100)+r"$^{\circ}$, Re="+sup_name[3].split(".")[0]+"k")
+        if "e221" in sup_name[0]:
+            plt.legend()
+        #plt.tight_layout() 
+
+        #u = fullSolution[0][1]
+        u = p_Solution
+        var_string = "x"
+        
+        vmin=np.min(u)
+        vmax=np.max(u)
+        lv = np.r_[vmin: vmax: 9j*5]
+        nsteps = 4
+
+
+
+
+#        airfoil_x    = data[14,jsta:jend,0]
+#        airfoil_y    = data[15,jsta:jend,0]
+#
+#
+#        #ins = ax.inset_axes([0.7,0.8,0.2,0.2])
+#        #ins = ax.inset_axes([0.0,0.0,1.,1.])
+#        if aoa_inf > 0: 
+#            ins = ax.inset_axes([0.4, 0.7, 0.4, 0.4])
+#            #ins = ax.inset_axes([0.4, 0., 0.4, 0.4])
+#        else:
+#            ins = ax.inset_axes([0.4, 0.7, 0.4, 0.4])
+#            #ins = ax.inset_axes([0.4, 0., 0.4, 0.4])
+#             
+#        ins.set_aspect(1.)
+#        ins.plot(airfoil_x, airfoil_y, color='grey')
+#
+#        # Turn off tick labels
+#        ins.set_yticklabels([])
+#        ins.set_xticklabels([])
+#        ins.axis('off')
+        #plt.show()
+        if aoa_inf>0:
+            ins = ax.inset_axes([0.5, 0.0, 0.4, 0.4])
+        else:
+            ins = ax.inset_axes([0.5, 0.6, 0.4, 0.4])
+             
+        #ins.set_aspect(1.)
+        ins.set_aspect(1.)
+        #ins.patch.set_facecolor('white')
+        ins.contourf(x, y, u, lv, cmap=liwei_plt_cm)
+        ins.set_xlim(-0.2,1.2)
+        if "e473" in sup_name[0]:
+            ins.set_ylim(-0.6,0.7)
+        else:
+            ins.set_ylim(-0.2,1.2)
+
+        ins.axis('off')
+        ins.set_facecolor('#ffffff')
+
+
+
+
+
+        plt.show()
+        #fig.savefig('./results_test_cp/cp_'+files[n][:-4]+'.eps', format='eps', dpi=300)
+#plt.ylim(0.55,0.9)
+
+    end_time_main_loop = sys_time.time()
+
+
+
+   
+
+
+
+#print("Main loop execution time: {}".format(convertSecond(end_time_main_loop - start_time_main_loop)))
+    #plt.figure()
+    #plt.plot(time,history)
+    #plt.savefig("./figures/loss_history.png")
+if __name__ == '__main__':
+    start = sys_time.time()
+    main()
+    end = sys_time.time()
+    #logMsg("\tExecution time: {}".format(convertSecond(end - start)))
+
+#print("Execution time: {}".format(convertSecond(end - start)))
+
+
+
