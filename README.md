@@ -11,7 +11,7 @@ The present study investigates the accurate inference of Reynolds-averaged Navie
 **Requirements**
 
 - [CFL3D Version 6.7](https://nasa.github.io/CFL3D/) for data generation. The official source code is [here](https://github.com/NASA/CFL3D), but we have [our own repo with some changes](https://github.com/Hypersonichen/CFL3D).
-- [Construct2D](https://sourceforge.net/projects/construct2d/) Note: we found "gfortran 9.4.0" causes problems and used "gfortran 7.5.0" to build the executable code. 
+- [Construct2D](https://sourceforge.net/projects/construct2d/) Note: we found "gfortran 9.4.0" causes problems so eventually used "gfortran 7.5.0" to build the executable code. Note also that one should use python2.7 to run the visualization script provided by Construct2D, e.g. `python2.7 postpycess.py`.
 - [PyTorch](https://pytorch.org/) *tested with "1.6.0", with "1.10.2", with "1.11.0+cu113"*. We recommend installing via conda, e.g., with `conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch`. 
 
 **Build CFL3D**
@@ -43,11 +43,11 @@ Step 1:
 (Note: the script calls "construct2d". It might take minutes generating 1500 mesh files. According to the data files for airfoil coordinates, if the training edge is sharp, the script generates C-type grids; if blunt, it writes O-type grids. The output files are *.p3d, *_stats.p3d and *.nmf files.)
 
 Step 2:
-`mkdir o-mesh_raw`
 
 `./Step-2_check_otype.sh` (Note: this step checks o-type mesh files, and moved those into the folder "o-mesh_raw".)
 
 Step 3:
+
 `./Step-3_conv_for_cfl3d_plot3dgrid.sh` (Note: because "construct2d" uses ASCII plot3d format, we need to translate the ASCII files into unformated binary format for NASA's cfl3d code. We only need *.bin files for the simulation.)
 
 
@@ -58,11 +58,15 @@ Step 4: (to be updated)
 
 `cd BASIC_simulations/`
 
-`gfortran plot3d_to_p3d.f90 -o plot3d_to_p3d`
+`./prep.sh`
 
-`gfortran avg_To_p3d.f90 -o avg_To_p3d`
+Modify Line # 42 in "dataGen.py" and make sure the file path is correct (i.e. the location of "cfl3d_seq"). 
 
+`python dataGen.py`
 
+The script reads the cfl3d input template `input_template.inp` and replaces the user-defined keywords with specified values. In the current version, we run 16000 iterations, and then average the results over another 8000 iterations.
+
+Note that potentially we can use well-tuned multi-grid method to accelerate the simulation. More technical details can be found in [CFL3D official website](https://nasa.github.io/CFL3D/). 
 
 # Training
 

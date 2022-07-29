@@ -39,7 +39,7 @@ def runSim(gridFile, xmach, alpha, re, ncyc, user_iteravg, user_rest, user_dt, u
                 line = line.replace("user_ncyc", str(int(ncyc)))
                 outFile.write(line)
 
-    return_value = os.system("/home/chen/Codes/cfl3d/CFL3D/build/cfl/seq/cfl3d_seq < input_1.inp")
+    return_value = os.system("/home/liwei/Codes/cfl3d/Hypersonichen_repo/CFL3D/build/cfl/seq/cfl3d_seq < input_1.inp")
     if return_value > 0:
         sys.exit("Problem when running cfl3d, stop.")
 
