@@ -30,16 +30,14 @@ In the current project, we only use the serial version "cfl3d_seq" in the folder
 
 `cd mesh_generation`
 
-`tar -xvf gen_airfoils.tar.gz`
-
-`gfortran conv_for_cfl3d_plot3d.f90 -o conv_for_cfl3d_plot3d`
-
-`gfortran conv_metric_to_p3d.f90 -o conv_metric_to_p3d`
-
-Then, modify Line #11 in "Step-1_script_meshing_v2.sh" with the correct path (where construct2d is installed).
+Step 0:
+`./Step-0_prep.sh`
 
 Step 1:
+Modify Line #11 in "Step-1_script_meshing_v2.sh" with the correct path (where construct2d is installed), and run
+
 `./Step-1_script_meshing_v2.sh` 
+
 (Note: the script calls "construct2d". It might take minutes generating 1500 mesh files. According to the data files for airfoil coordinates, if the training edge is sharp, the script generates C-type grids; if blunt, it writes O-type grids. The output files are *.p3d, *_stats.p3d and *.nmf files.)
 
 Step 2:
