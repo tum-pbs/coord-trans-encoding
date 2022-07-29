@@ -11,9 +11,20 @@ The present study investigates the accurate inference of Reynolds-averaged Navie
 **Requirements**
 
 - [CFL3D Version 6.7](https://nasa.github.io/CFL3D/) for data generation. The official source code is [here](https://github.com/NASA/CFL3D), but we have [our own repo with some changes](https://github.com/Hypersonichen/CFL3D).
-- [Construct2D](https://sourceforge.net/projects/construct2d/)
+- [Construct2D](https://sourceforge.net/projects/construct2d/) Note: we found "gfortran 9.4.0" causes problems and used "gfortran 7.5.0" to build the executable code. 
 - [PyTorch](https://pytorch.org/) *tested with "1.6.0", with "1.10.2", with "1.11.0+cu113"*. We recommend installing via conda, e.g., with `conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch`. 
 
+**Build CFL3D**
+
+Clone the NASA's CFL3D code to your local computer: 
+
+`git clone https://github.com/Hypersonichen/CFL3D.git`
+
+`cd CFL3D/build/`
+
+`./setup.sh`
+
+In the current project, we only use the serial version "cfl3d_seq" in the folder "CFL3D/build/cfl/seq/".
 
 **Mesh Generation**
 
@@ -42,7 +53,15 @@ Step 3:
 
 Step 4: (to be updated)
 
+
 **Run CFL3D**
+
+`cd BASIC_simulations/`
+
+`gfortran plot3d_to_p3d.f90 -o plot3d_to_p3d`
+
+`gfortran avg_To_p3d.f90 -o avg_To_p3d`
+
 
 
 # Training

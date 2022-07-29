@@ -3,6 +3,9 @@
 
 #FILES=$(find /home/liwei/Simulations/thuerey_research/data/database/airfoil_database/ -type f -newermt '2018-01-17' ! -newermt '2018-01-18')
 #FILES=$(find /home/liwei/Simulations/thuerey_research/data/database/airfoil_database/ -type f )
+
+mkdir c-mesh
+
 FILES=$(ls *.nmf )
 i=0
 for file in $FILES; do
@@ -20,3 +23,5 @@ EOF
 fi
 done 
 #./transform_shear_minus0.5    << EOF
+
+mv *.bin c-mesh
