@@ -52,7 +52,7 @@ Step 3:
 `./Step-3_conv_for_cfl3d_plot3dgrid.sh` (Note: because "construct2d" uses ASCII plot3d format, we need to translate the ASCII files into unformated binary format for NASA's cfl3d code. We only need *.bin files for the simulation.)
 
 
-**Run CFL3D**
+**Simulation with CFL3D**
 
 `cd BASIC_simulations/`
 
@@ -64,7 +64,8 @@ Modify Line # 42 in "dataGen.py" and make sure the file path is correct (i.e. th
 
 The script reads the cfl3d input template `input_template.inp` and replaces the user-defined keywords with specified values. In the current version, we run 16000 iterations, and then average the results over another 8000 iterations. The final results, $\rho$, $\rho u$, $\rho v$, $\rho E$, are saved in npz format in the folder `train_avg`.
 
-Note that potentially we can use well-tuned multi-grid method to accelerate the simulation. More technical details can be found in [CFL3D official website](https://nasa.github.io/CFL3D/). 
+Note that potentially we can use well-tuned multi-grid method to accelerate the simulation. Also, it is helpful to try one of the test cases from [CFL3D official website](https://nasa.github.io/CFL3D/), e.g. [steady flow over NACA0012](https://nasa.github.io/CFL3D/Cfl3dv6/cfl3dv6_testcases.html#n0012), in order to get familiar with the solver before running our script.
+
 
 **Obtaining the metrics**
 

@@ -17,6 +17,7 @@ freestream_angle  = 22.5 #degree  # -angle ... angle
 cmesh_database  = "../mesh_generation/c-mesh/"
 output_dir        = "./train/"
 current_dir       = os.getcwd() 
+cfl3d_dir = "/home/ubuntu/Codes/cfl3d/Hypersonichen_repo/CFL3D/build/cfl/seq/cfl3d_seq"
 #"/home/liwei/Simulations/cfl3d_TestCases/02_Airfoils/c_type_input_channels/"
 seed = random.randint(0, 2**32 - 1)
 np.random.seed(seed)
@@ -39,7 +40,8 @@ def runSim(gridFile, xmach, alpha, re, ncyc, user_iteravg, user_rest, user_dt, u
                 line = line.replace("user_ncyc", str(int(ncyc)))
                 outFile.write(line)
 
-    return_value = os.system("/home/liwei/Codes/cfl3d/Hypersonichen_repo/CFL3D/build/cfl/seq/cfl3d_seq < input_1.inp")
+    return_value = os.system(cfl3d_dir+" < input_1.inp")
+    #return_value = os.system("/home/ubuntu/cfl3d_seq < input_1.inp")
     if return_value > 0:
         sys.exit("Problem when running cfl3d, stop.")
 
