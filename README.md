@@ -22,6 +22,9 @@ This is the source code for the paper ["Towards high-accuracy deep learning infe
 
 Additional information: [project page](https://ge.in.tum.de/2021/09/07/high-accuracy-transonic-rans-flow-predictions-with-deep-neural-networks-preprint-online-now/)
 
+<img src="resources/coordinates_physical_u.png" alt="drawing" width="200"/>
+<img src="resources/coordinates_canonical_u.png" alt="drawing" width="200"/>
+
 ## Abstract:
 The present study investigates the accurate inference of Reynolds-averaged Navier-Stokes solutions for the compressible flow over aerofoils in two dimensions with a deep neural network. Our approach yields networks that learn to generate precise flow fields for varying body-fitted, structured grids by providing them with an encoding of the corresponding mapping to a canonical space for the solutions. We apply the deep neural network model to a benchmark case of incompressible flow at randomly given angles of attack and Reynolds numbers and achieve an improvement of more than an order of magnitude compared to previous work. Further, for transonic flow cases, the deep neural network model accurately predicts complex flow behaviour at high Reynolds numbers, such as shock wave/boundary layer interaction, and quantitative distributions like pressure coefficient, skin friction coefficient as well as wake total pressure profiles downstream of aerofoils. The proposed deep learning method significantly speeds up the predictions of flow fields and shows promise for enabling fast aerodynamic designs.
 
@@ -121,6 +124,8 @@ Extract the "test_mesh.tar.gz".
 `python cp_subplots.py`
 
 `python skinfriction_subplots.py`
+
+<img src="resources/e221_71_343_661_phys.png" alt="drawing" width="800"/>
 
 # Closing Remarks
 
