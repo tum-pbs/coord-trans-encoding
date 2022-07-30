@@ -1,3 +1,22 @@
+<style TYPE="text/css">
+code.has-jax {font: inherit; font-size: 100%; background: inherit; border: inherit;}
+</style>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'] // removed 'code' entry
+    }
+});
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML-full"></script>
+
 # coord-trans-encoding
 This is the source code for the paper ["Towards high-accuracy deep learning inference of compressible turbulent flows over aerofoils"](https://arxiv.org/abs/2109.02183) by Liwei Chen and Nils Thuerey.
 
@@ -49,9 +68,6 @@ Step 3:
 `./Step-3_conv_for_cfl3d_plot3dgrid.sh` (Note: because "construct2d" uses ASCII plot3d format, we need to translate the ASCII files into unformated binary format for NASA's cfl3d code. We only need *.bin files for the simulation.)
 
 
-Step 4: (to be updated)
-
-
 **Run CFL3D**
 
 `cd BASIC_simulations/`
@@ -62,9 +78,29 @@ Modify Line # 42 in "dataGen.py" and make sure the file path is correct (i.e. th
 
 `python dataGen.py`
 
-The script reads the cfl3d input template `input_template.inp` and replaces the user-defined keywords with specified values. In the current version, we run 16000 iterations, and then average the results over another 8000 iterations.
+The script reads the cfl3d input template `input_template.inp` and replaces the user-defined keywords with specified values. In the current version, we run 16000 iterations, and then average the results over another 8000 iterations. The final results, $\rho$, $\rho u$, $\rho v$, $\rho E$, are saved in npz format in the folder `train_avg`.
 
 Note that potentially we can use well-tuned multi-grid method to accelerate the simulation. More technical details can be found in [CFL3D official website](https://nasa.github.io/CFL3D/). 
+
+**Obtaining the metrics**
+
+The ["metrics"](https://nasa.github.io/CFL3D/Cfl3dv6/V5Manual/GenCoor.pdf) contain geometrical information. As each airfoil only has one mesh and there is no mesh deformation, we can ouput the coordinate transformation metrics as a separate post-processing task. (Warning: this is a special case, in some unsteady projects where mesh deformation or aeroelasticity are involved, the metrics should be saved during the simulation. We will update this in the up-coming tutorial and project.) 
+
+We want to re-build cfl3d (note: suppose we have copied the code "cfl3d_seq" built previously to somewhere, e.g. /usr/local/bin/)
+
+`cd CFL3D/build/`
+
+`make scruball` (note: this means all the previously-built files are deleted.)
+
+`./metric_setup.sh` (we only use the serial version "cfl3d_seq" in the folder "CFL3D/build/cfl/seq/".)
+
+`cd metric_generation`
+
+`python metricGen.py` 
+
+The script calls cfl3d_seq. Instead of running a flow simulation, it only reads mesh files and calculates "metrics", and then saves 7 variables (because it is 2D), i.e. `si4, sj1, sj3, sj4, sk1, sk3, sk4` to files.
+
+
 
 # Training
 
