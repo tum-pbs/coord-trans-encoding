@@ -70,7 +70,7 @@ Note that potentially we can use well-tuned multi-grid method to accelerate the 
 
 The ["metrics"](https://nasa.github.io/CFL3D/Cfl3dv6/V5Manual/GenCoor.pdf) contain geometrical information. As each aerofoil only has one mesh and there is no mesh deformation, we can ouput the coordinate transformation metrics as a separate post-processing task. (Warning: this is a special case, in some unsteady projects where mesh deformation or aeroelasticity are involved, the metrics should be saved during the simulation. We will update this in the up-coming tutorial and project.) 
 
-We want to re-build cfl3d (warning: suppose we have copied the executable file "cfl3d_seq" built previously to somewhere, e.g. /usr/local/bin/, otherwise it will be overwritten!)
+We want to re-build cfl3d (**warning: suppose we have copied the executable file "cfl3d_seq" built previously to somewhere, e.g. /usr/local/bin/, otherwise it will be overwritten!**)
 
 `cd CFL3D/build/`
 
@@ -108,7 +108,7 @@ We recommend using the pre-generated data for training.
 
 Download and extract the data. Then, make sure the sub-folders "train_avg" and "test_avg" are under the folder "BASIC_data_coordinates_final_metricsAll_1940".
 
-`nohup python runTrain.py > output.log` (Note: in Line 33 of "runTrain.py", if we use "expo=7", the number of trainable parameters is 30928388. Training runs 1290 epochs.)
+`nohup python runTrain.py > output.log &` (Note: in Line 33 of "runTrain.py", if we use "expo=7", the number of trainable parameters is 30928388. Training runs 1290 epochs.)
 
 One can also download the trained model as well as *pickle files [here](https://drive.google.com/file/d/1E7QC5BtwF0EI0r6OaUvB5qzDTLBLJwS2/view?usp=sharing), the random seed used in the model is "2125985365".
 
