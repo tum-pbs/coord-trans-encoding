@@ -3,9 +3,6 @@ This is the source code for the paper ["Towards high-accuracy deep learning infe
 
 Additional information: [project page](https://ge.in.tum.de/2021/09/07/high-accuracy-transonic-rans-flow-predictions-with-deep-neural-networks-preprint-online-now/)
 
-<img src="resources/coordinates_physical_u.png" alt="drawing" width="200"/>
-<img src="resources/coordinates_canonical_u.png" alt="drawing" width="200"/>
-
 ## Abstract:
 The present study investigates the accurate inference of Reynolds-averaged Navier-Stokes solutions for the compressible flow over aerofoils in two dimensions with a deep neural network. Our approach yields networks that learn to generate precise flow fields for varying body-fitted, structured grids by providing them with an encoding of the corresponding mapping to a canonical space for the solutions. We apply the deep neural network model to a benchmark case of incompressible flow at randomly given angles of attack and Reynolds numbers and achieve an improvement of more than an order of magnitude compared to previous work. Further, for transonic flow cases, the deep neural network model accurately predicts complex flow behaviour at high Reynolds numbers, such as shock wave/boundary layer interaction, and quantitative distributions like pressure coefficient, skin friction coefficient as well as wake total pressure profiles downstream of aerofoils. The proposed deep learning method significantly speeds up the predictions of flow fields and shows promise for enabling fast aerodynamic designs.
 
@@ -41,7 +38,7 @@ Modify Line #11 in "Step-1_script_meshing_v2.sh" with the correct path (where co
 
 `./Step-1_script_meshing_v2.sh` 
 
-(Note: the script calls "construct2d". It might take minutes generating 1500 mesh files. According to the data files for airfoil coordinates, if the training edge is sharp, the script generates C-type grids; if blunt, it writes O-type grids. The output files are *.p3d, *_stats.p3d and *.nmf files.)
+(Note: the script calls "construct2d". It might take minutes generating 1500 mesh files. According to the data files for aerofoil coordinates, if the training edge is sharp, the script generates C-type grids; if blunt, it writes O-type grids. The output files are *.p3d, *_stats.p3d and *.nmf files.)
 
 Step 2:
 
@@ -53,6 +50,8 @@ Step 3:
 
 
 **Simulation with CFL3D**
+
+In this tutorial, we are going to reproduce the transonic case with "Method C" and 1940 training samples. 
 
 `cd BASIC_simulations/`
 
@@ -69,7 +68,7 @@ Note that potentially we can use well-tuned multi-grid method to accelerate the 
 
 **Obtaining the metrics**
 
-The ["metrics"](https://nasa.github.io/CFL3D/Cfl3dv6/V5Manual/GenCoor.pdf) contain geometrical information. As each airfoil only has one mesh and there is no mesh deformation, we can ouput the coordinate transformation metrics as a separate post-processing task. (Warning: this is a special case, in some unsteady projects where mesh deformation or aeroelasticity are involved, the metrics should be saved during the simulation. We will update this in the up-coming tutorial and project.) 
+The ["metrics"](https://nasa.github.io/CFL3D/Cfl3dv6/V5Manual/GenCoor.pdf) contain geometrical information. As each aerofoil only has one mesh and there is no mesh deformation, we can ouput the coordinate transformation metrics as a separate post-processing task. (Warning: this is a special case, in some unsteady projects where mesh deformation or aeroelasticity are involved, the metrics should be saved during the simulation. We will update this in the up-coming tutorial and project.) 
 
 We want to re-build cfl3d (note: suppose we have copied the code "cfl3d_seq" built previously to somewhere, e.g. /usr/local/bin/)
 
@@ -83,15 +82,29 @@ We want to re-build cfl3d (note: suppose we have copied the code "cfl3d_seq" bui
 
 `python metricGen.py` 
 
-The script calls cfl3d_seq. Instead of running a flow simulation, it only reads mesh files and calculates "metrics", and then saves 7 variables (because it is 2D), i.e. `si4, sj1, sj3, sj4, sk1, sk3, sk4` to files.
+The script calls cfl3d_seq. Instead of running a flow simulation, it only reads mesh files and calculates "metrics", and then saves 7 variables, $J^{-1}$, $\hat{\xi}_x$, $\hat{\xi}_y$, $|\nabla \xi|/J$, $\hat{\eta}_x$, $\hat{\eta}_y$, $|\nabla \eta|/J$, $x_0$, and $y_0$ (i.e. [arrays `si4, sj1, sj3, sj4, sk1, sk3, sk4`](https://nasa.github.io/CFL3D/Cfl3dv6/V5Manual/GenCoor.pdf)).
 
+**Re-shaping the data**
 
+We will merge the flowfield data, metrics, and surface coordinates for training the U-net as shown in the below architecture:
 
-# Training
+<img src="resources/U-net.png" alt="drawing" width="600"/>
+
+`cd BASIC_simulations`
+
+`mkdir ../BASIC_data_coordinates_final_metricsAll`
+
+`mkdir ../BASIC_data_coordinates_final_metricsAll/train_avg` (the merged data will be put here.)
+
+`python merge_coordinates_metricsAll.py`
+
+Now the input data include $Ma_{\infty}$, $Re_{\infty}$, $\alpha_{\infty}$, $J^{-1}$, $\hat{\xi}_x$, $\hat{\xi}_y$, $|\nabla \xi|/J$, $\hat{\eta}_x$, $\hat{\eta}_y$, $|\nabla \eta|/J$, $x_0$, and $y_0$.
+
+# Training 
 
 We recommend using the pre-generated data for training.
-- [Training set](https://drive.google.com/file/d/16z1ZL60yWyVfyvFU8Uq3SMVfMHEQkGJ_/view?usp=sharing) 2.24Gb. There are 970 airfoils and each airfoil case has two randomly-selected flow conditions, so totally we have 1940 flowfields.
-- [Test set](https://drive.google.com/file/d/1fCYnhxfXicwxtlivItU6VJ_ltcuD51FI/view?usp=sharing) 23.7Mb. There are 20 airfoils that haven't been seen in the training set; each has one flow condition, and totally we have 20 flowfields.
+- [Training set](https://drive.google.com/file/d/16z1ZL60yWyVfyvFU8Uq3SMVfMHEQkGJ_/view?usp=sharing) 2.24Gb. There are 970 aerofoils and each aerofoil case has two randomly-selected flow conditions, so totally we have 1940 flowfields.
+- [Test set](https://drive.google.com/file/d/1fCYnhxfXicwxtlivItU6VJ_ltcuD51FI/view?usp=sharing) 23.7Mb. There are 20 aerofoils that haven't been seen in the training set; each has one flow condition, and totally we have 20 flowfields.
 
 Download and extract the data. Then, make sure the sub-folders "train_avg" and "test_avg" are under the folder "BASIC_data_coordinates_final_metricsAll_1940".
 
@@ -103,9 +116,23 @@ One can also download the trained model as well as *pickle files [here](https://
 
 Extract the "test_mesh.tar.gz".
 
-`python cp_subplots.py`
+Here we show the x-component velocity field over aerofoil “fx84w097” in the physical space and the corresponding distribution in the curvilinear coordinate system ($\xi$, $\eta$):
 
-`python skinfriction_subplots.py`
+<img src="resources/coordinates_physical_u.png" alt="drawing" width="200"/>
+<img src="resources/coordinates_canonical_u.png" alt="drawing" width="200"/>
+
+`python cp_subplots.py` (pressure coefficient)
+
+<img src="resources/e221_cp.jpeg" alt="drawing" width="300"/>
+
+`python skinfriction_subplots.py` (skin friction coefficient)
+
+The trained neural network yields results that resolve all necessary structures such as shocks, and has an average error of less than 0.3% for turbulent transonic cases. This is appropriate for real-world, industrial applications. Here’s are the inferred skin friction coefficent for ‘e221’:
+
+<img src="resources/e221_cf.jpeg" alt="drawing" width="300"/>
+
+The flow field of aerofoil “e221” at the test condition is characterised
+by a strong standing shock wave and shock-induced separation. Here is the comparison of DNN and CFD results:
 
 <img src="resources/e221_71_343_661_phys.png" alt="drawing" width="800"/>
 
