@@ -70,7 +70,7 @@ Note that potentially we can use well-tuned multi-grid method to accelerate the 
 
 The ["metrics"](https://nasa.github.io/CFL3D/Cfl3dv6/V5Manual/GenCoor.pdf) contain geometrical information. As each aerofoil only has one mesh and there is no mesh deformation, we can ouput the coordinate transformation metrics as a separate post-processing task. (Warning: this is a special case, in some unsteady projects where mesh deformation or aeroelasticity are involved, the metrics should be saved during the simulation. We will update this in the up-coming tutorial and project.) 
 
-We want to re-build cfl3d (note: suppose we have copied the code "cfl3d_seq" built previously to somewhere, e.g. /usr/local/bin/)
+We want to re-build cfl3d (warning: suppose we have copied the executable file "cfl3d_seq" built previously to somewhere, e.g. /usr/local/bin/, otherwise it will be overwritten!)
 
 `cd CFL3D/build/`
 
