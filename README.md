@@ -116,7 +116,7 @@ One can also download the trained model as well as *pickle files [here](https://
 
 Extract the "test_mesh.tar.gz".
 
-Here we show the x-component velocity field over aerofoil “fx84w097” in the physical space and the corresponding distribution in the curvilinear coordinate system ($\xi$, $\eta$):
+Here we show the x-component velocity field over aerofoil “fx84w097” in the physical space and the corresponding distribution in the curvilinear coordinate system $(\xi$, $\eta)$:
 
 <img src="resources/coordinates_physical_u.png" alt="drawing" width="200"/>
 <img src="resources/coordinates_canonical_u.png" alt="drawing" width="200"/>
