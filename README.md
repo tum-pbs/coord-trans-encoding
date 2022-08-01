@@ -1,4 +1,4 @@
-# coord-trans-encoding
+# Coordinate Transformation Matrix Encoding
 This is the source code for the paper ["Towards high-accuracy deep learning inference of compressible turbulent flows over aerofoils"](https://arxiv.org/abs/2109.02183) by Liwei Chen and Nils Thuerey.
 
 Additional information: [project page](https://ge.in.tum.de/2021/09/07/high-accuracy-transonic-rans-flow-predictions-with-deep-neural-networks-preprint-online-now/)
