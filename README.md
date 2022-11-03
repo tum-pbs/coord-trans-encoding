@@ -84,6 +84,20 @@ We want to re-build cfl3d (**warning: suppose we have copied the executable file
 
 The script calls cfl3d_seq. Instead of running a flow simulation, it only reads mesh files and calculates "metrics", and then saves 7 variables, $J^{-1}$, $\hat{\xi}_x$, $\hat{\xi}_y$, $|\nabla \xi|/J$, $\hat{\eta}_x$, $\hat{\eta}_y$, $|\nabla \eta|/J$, $x_0$, and $y_0$ (i.e. [arrays `si4, sj1, sj3, sj4, sk1, sk3, sk4`](https://nasa.github.io/CFL3D/Cfl3dv6/V5Manual/GenCoor.pdf)).
 
+`metrics:`
+- si(1-3)...components of unit normal to i-face (directed area)
+- si( 4 )...area of  i-face
+- si( 5 ).. speed of i-face
+
+- sj(1-3)...components of unit normal to j-face (directed area)
+- sj( 4 )...area of  j-face
+- sj( 5 ).. speed of j-face
+
+- sk(1-3)...components of unit normal to k-face (directed area)
+- sk( 4 )...area of  k-face
+- sk( 5 ).. speed of k-face
+
+
 **Re-shaping the data**
 
 We will merge the flowfield data, metrics, and surface coordinates for training the U-net as shown in the below architecture:
