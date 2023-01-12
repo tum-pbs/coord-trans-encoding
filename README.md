@@ -61,7 +61,7 @@ Modify Line # 42 in "dataGen.py" and make sure the file path is correct (i.e. th
 
 `python dataGen.py`
 
-The script reads the cfl3d input template `input_template.inp` and replaces the user-defined keywords with specified values. In the current version, we run 16000 iterations, and then average the results over another 8000 iterations. The final results, $\rho$, $\rho u$, $\rho v$, $\rho E$, are saved in npz format in the folder `train_avg`.
+The script reads the cfl3d input template `input_template.inp` and replaces the user-defined keywords with specified values. In the current version, we run 15000 iterations, and then average the results over another 5000 iterations (see `input_template2.inp`). The final results, $\rho$, $\rho u$, $\rho v$, $\rho E$, are saved in npz format in the folder `train_avg`. The data are saved with `cell-center` type (i.e. iptype=1 in CFL3D).
 
 Note that potentially we can use well-tuned multi-grid method to accelerate the simulation. Also, it is helpful to try one of the test cases from [CFL3D official website](https://nasa.github.io/CFL3D/), e.g. [steady flow over NACA0012](https://nasa.github.io/CFL3D/Cfl3dv6/cfl3dv6_testcases.html#n0012), in order to get familiar with the solver before running our script.
 
