@@ -17,15 +17,16 @@ freestream_angle  = 22.5 #degree  # -angle ... angle
 cmesh_database  = "../mesh_generation/c-mesh/"
 output_dir        = "./train/"
 current_dir       = os.getcwd() 
-cfl3d_dir = "/home/ubuntu/Codes/cfl3d/Hypersonichen_repo/CFL3D/build/cfl/seq/cfl3d_seq"
+#cfl3d_dir = "/home/liwei/Codes/cfl3d/Hypersonichen_repo/CFL3D/build/cfl/seq/cfl3d_seq"
+cfl3d_dir = "/home/liwei/Codes/cfl3d/CFL3D/build/cfl/seq/cfl3d_seq"
 #"/home/liwei/Simulations/cfl3d_TestCases/02_Airfoils/c_type_input_channels/"
 seed = random.randint(0, 2**32 - 1)
 np.random.seed(seed)
 print("Seed: {}".format(seed))
 
 
-def runSim(gridFile, xmach, alpha, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep):
-    with open("input_template.inp", "rt") as inFile:
+def runSim(gridFile, inputFile, xmach, alpha, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep):
+    with open(inputFile, "rt") as inFile:
         with open("input_1.inp", "wt") as outFile:
             for line in inFile:
                 #line = line.replace("user_xmach", "{}".format(xmach))
@@ -187,7 +188,7 @@ for n in range(ista, iend):
     user_ntstep = 1
     user_rest = 0
     ncyc = 16000
-    runSim(basename, xmach, angle, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep)
+    runSim(basename, "input_template.inp", xmach, angle, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep)
 
     #print("\tUsing M= %5.3f, angle %+5.3f, re= %+5.3f million" %(xmach, angle, re)  )
     #user_iteravg = 0
@@ -203,7 +204,7 @@ for n in range(ista, iend):
     user_ntstep = 1
     user_rest = 1
     ncyc = 8000
-    runSim(basename, xmach, angle, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep)
+    runSim(basename, "input_template2.inp", xmach, angle, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep)
     
     #return_value = os.system(current_dir+"/plot3d_To_p3d") # at the moment, we don't change mesh
     return_value = os.system(current_dir+"/avg_To_p3d") # at the moment, we don't change mesh
