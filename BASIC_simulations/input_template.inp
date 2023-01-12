@@ -20,7 +20,7 @@ user_case_title
      XMACH     ALPHA      BETA  REUE,MIL   TINF,DR     IALPH    IHSTRY
 user_xmach  user_aoa       0.0   user_re     520.0         0         0
       SREF      CREF      BREF       XMC       YMC       ZMC
-   1.00000   1.00000    1.0000   0.00000      0.00      0.00
+   1.00000   1.00000    1.0000   0.25000      0.00      0.00
         DT     IREST   IFLAGTS      FMAX     IUNST    CFLTAU
    user_dt user_rest       000   05.0000         0       10.
      NGRID   NPLOT3D    NPRINT    NWREST      ICHK       I2D    NTSTEP       ITA
@@ -30,7 +30,7 @@ user_xmach  user_aoa       0.0   user_re     520.0         0         0
       IDIM      JDIM      KDIM
          2       129       129
     ILAMLO    ILAMHI    JLAMLO    JLAMHI    KLAMLO    KLAMHI
-         1         2       417       609         1       513
+         0         0         0         0         0         0
      INEWG    IGRIDC        IS        JS        KS        IE        JE        KE
          0         0         0         0         0         0         0         0
   IDIAG(I)  IDIAG(J)  IDIAG(K)  IFLIM(I)  IFLIM(J)  IFLIM(K)
@@ -44,9 +44,9 @@ I0:   GRID   SEGMENT    BCTYPE      JSTA      JEND      KSTA      KEND     NDATA
 IDIM: GRID   SEGMENT    BCTYPE      JSTA      JEND      KSTA      KEND     NDATA
          1         1      1002         0         0         0         0         0
 J0:   GRID   SEGMENT    BCTYPE      ISTA      IEND      KSTA      KEND     NDATA
-         1         1      1003         0         0         0         0         0
+         1         1      1002         0         0         0         0         0
 JDIM: GRID   SEGMENT    BCTYPE      ISTA      IEND      KSTA      KEND     NDATA
-         1         1      1003         0         0         0         0         0
+         1         1      1002         0         0         0         0         0
 K0:   GRID   SEGMENT    BCTYPE      ISTA      IEND      JSTA      JEND     NDATA
          1         1         0         0         0         1        25         0
          1         2      2004         0         0        25       105         2
@@ -56,13 +56,17 @@ K0:   GRID   SEGMENT    BCTYPE      ISTA      IEND      JSTA      JEND     NDATA
 KDIM: GRID   SEGMENT    BCTYPE      ISTA      IEND      JSTA      JEND     NDATA
          1         1      1003         0         0         0         0         0
       MSEQ    MGFLAG    ICONSF       MTT      NGAM
-         1         1         0         0         2
+         3         1         0         0        02
       ISSC EPSSSC(1) EPSSSC(2) EPSSSC(3)      ISSR EPSSSR(1) EPSSSR(2) EPSSSR(3)
          0       0.3       0.3       0.3         0       0.3       0.3       0.3
       NCYC    MGLEVG     NEMGL     NITFO
- user_ncyc         4         0         0
-      MIT1      MIT2      MIT3      MIT4      MIT5
-         1         1         1         1         1
+ user_ncyc        02        00       000
+ user_ncyc        03        00       000
+ user_ncyc        03        00       000
+      MIT1      MIT2      MIT3      MIT4      MIT5      MIT6      MIT7     MIT8
+        01        01        01        01        01         1         1        1
+        01        01        01        01        01         1         1        1
+        01        01        01        01        01         1         1        1
    1-1 BLOCKING DATA:
       NBLI
          1
