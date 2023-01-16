@@ -62,7 +62,7 @@ KDIM: GRID   SEGMENT    BCTYPE      ISTA      IEND      JSTA      JEND     NDATA
       NCYC    MGLEVG     NEMGL     NITFO
  user_ncyc        02        00       000
  user_ncyc        03        00       000
- user_ncyc        03        00       000
+ user_ncyc        04        00       000
       MIT1      MIT2      MIT3      MIT4      MIT5      MIT6      MIT7     MIT8
         01        01        01        01        01         1         1        1
         01        01        01        01        01         1         1        1
