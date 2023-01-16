@@ -5,6 +5,9 @@
 ## thanks https://twitter.com/freebsdfrau
 FILES=$(ls ./gen_airfoils/* )
 
+# When using TEST:
+# FILES=$(ls ./gen_airfoils_TEST/* )
+
                                                                                      
 for file in $FILES; do
 echo "${file}"
@@ -19,6 +22,8 @@ NSRF
 81
 NWKE
 24
+LESP
+1e-3
 QUIT
 VOPT
 RECD
