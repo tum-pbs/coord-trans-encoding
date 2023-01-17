@@ -12,9 +12,11 @@ import numpy as np
 import shutil
 import subprocess
 from matplotlib import pyplot as plt
-freestream_angle  = 22.5 #degree  # -angle ... angle
+
+AVER = False
 
 cmesh_database  = "../mesh_generation/c-mesh/"
+#cmesh_database  = "./c-mesh_1433/"
 output_dir        = "./train/"
 current_dir       = os.getcwd() 
 #cfl3d_dir = "/home/liwei/Codes/cfl3d/Hypersonichen_repo/CFL3D/build/cfl/seq/cfl3d_seq"
@@ -184,36 +186,30 @@ for n in range(ista, iend):
 ####################################################################################################
     print("\tUsing M= %5.3f, angle %+5.3f, re= %+5.3f million" %(xmach, angle, re)  )
     user_iteravg = 0
-    user_dt = -1.0 #5.0
+    user_dt = -1.0
     user_ntstep = 1
     user_rest = 0
-    ncyc = 16000
+    ncyc = 10000
     runSim(basename, "input_template.inp", xmach, angle, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep)
 
-    #print("\tUsing M= %5.3f, angle %+5.3f, re= %+5.3f million" %(xmach, angle, re)  )
-    #user_iteravg = 0
-    #user_dt = -5.0
-    #user_ntstep = 1
-    #user_rest = 1
-    #ncyc = 8000
-    #runSim(basename, xmach, angle, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep)
+    hist_fileName =  "%s_%d_%d_%d" % (basename, int(xmach*100), int(angle*100), int(re*1000) )
 
-    print("restart... start averaging...")
-    user_iteravg = 1
-    user_dt = -1.0 #5.0
-    user_ntstep = 1
-    user_rest = 1
-    ncyc = 8000
-    runSim(basename, "input_template2.inp", xmach, angle, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep)
+    if AVER:
+        print("restart... start averaging...")
+        user_iteravg = 1
+        user_dt = -1.0
+        user_ntstep = 1
+        user_rest = 1
+        ncyc = 5000
+        runSim(basename, "input_template2.inp", xmach, angle, re, ncyc, user_iteravg, user_rest, user_dt, user_ntstep)
     
-    #return_value = os.system(current_dir+"/plot3d_To_p3d") # at the moment, we don't change mesh
-    return_value = os.system(current_dir+"/avg_To_p3d") # at the moment, we don't change mesh
-    print(return_value)
-    if return_value > 0:
-        sys.exit("Problem when coverting cfl3d_avgq.p3d to plot3d_stats.p3d, stop.")
-    else:
-        outputProcessing(basename, xmach, angle, re, "./train_avg", imax, jmax, imageIndex=n)
-        print("\tdone")
+        return_value = os.system(current_dir+"/avg_To_p3d") # at the moment, we don't change mesh
+        print(return_value)
+        if return_value > 0:
+            sys.exit("Problem when coverting cfl3d_avgq.p3d to plot3d_stats.p3d, stop.")
+        else:
+            outputProcessing(basename, xmach, angle, re, "./train_avg", imax, jmax, imageIndex=n)
+            print("\tdone")
 #Here we should use os mov file to do it not system command !!!!return_value = os.system(mv plot3dg.p3d current_dir+"/train_mesh/"+basename+".p3d") # at the moment, we don't change mesh
 
 
@@ -221,22 +217,27 @@ for n in range(ista, iend):
     #return_value = os.system(current_dir+"/avg_To_p3d") # at the moment, we don't change mesh
     print(return_value)
     if return_value > 0:
-        sys.exit("Problem when coverting plot3dq.bin to plot3d_stats.p3d, stop.")
+        #sys.exit("Problem when coverting plot3dq.bin to plot3d_stats.p3d, stop.")
+        print("Problem when coverting plot3dq.bin to plot3d_stats.p3d.")
+        shutil.copy("./restart.bin", "./failed_files/"+hist_fileName+".bin")
+        #shutil.copy("./cfl3d.res", "./failed_files/"+hist_fileName+".res")
+        shutil.copy("./cfl3d.out", "./failed_files/"+hist_fileName+".out")
+        
     else:
         outputProcessing(basename, xmach, angle, re, "./train", imax, jmax, imageIndex=n)
         print("\tdone")
-    shutil.copy("./plot3dg.p3d", "./train_mesh/"+basename+".p3d")
-    os.remove("./plot3dg.p3d")
-    os.remove("./plot3dg_stats.p3d")
-    os.remove("./plot3dg.bin")
-    os.remove("./plot3dq.bin")
-    os.remove("./cfl3d_avgg.p3d")
-    os.remove("./cfl3d_avgq.p3d")
-#Here we should use os mov file to do it not system command !!!!return_value = os.system(mv plot3dg.p3d current_dir+"/train_mesh/"+basename+".p3d") # at the moment, we don't change mesh
-    hist_fileName =  "%s_%d_%d_%d" % (basename, int(xmach*100), int(angle*100), int(re*1000) )
-    shutil.copy("./cfl3d.res", "./history_files/"+hist_fileName+".res")
-    shutil.copy("./restart.bin", "./run_files/"+hist_fileName+".bin")
-    shutil.copy("./cfl3d.out", "./run_files/"+hist_fileName+".out")
-    ##if not os.path.isfile("./train_mesh/"+basename+".p3d"):
-    ##shutil.copy("./plot3dg.p3d", "./train_mesh/"+basename+".p3d")
+        shutil.copy("./plot3dg.p3d", "./train_mesh/"+basename+".p3d")
+        os.remove("./plot3dg.p3d")
+        os.remove("./plot3dg_stats.p3d")
+        os.remove("./plot3dg.bin")
+        os.remove("./plot3dq.bin")
+        if AVER:
+            os.remove("./cfl3d_avgg.p3d")
+            os.remove("./cfl3d_avgq.p3d")
+    #Here we should use os mov file to do it not system command !!!!return_value = os.system(mv plot3dg.p3d current_dir+"/train_mesh/"+basename+".p3d") # at the moment, we don't change mesh
+        shutil.copy("./cfl3d.res", "./history_files/"+hist_fileName+".res")
+        shutil.copy("./restart.bin", "./run_files/"+hist_fileName+".bin")
+        shutil.copy("./cfl3d.out", "./run_files/"+hist_fileName+".out")
+        ##if not os.path.isfile("./train_mesh/"+basename+".p3d"):
+        ##shutil.copy("./plot3dg.p3d", "./train_mesh/"+basename+".p3d")
 
