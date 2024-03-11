@@ -1,7 +1,9 @@
 # Towards high-accuracy deep learning inference of compressible turbulent flows over aerofoils: Coordinate Transformation Encoding with Matrices
 This is the source code for the paper ["Towards high-accuracy deep learning inference of compressible turbulent flows over aerofoils"](https://doi.org/10.1016/j.compfluid.2022.105707) by Liwei Chen and Nils Thuerey.
 
-Additional information: [lab page](https://ge.in.tum.de/)
+A preprint of the paper can be found on arXiv at <https://arxiv.org/abs/2109.02183>.
+
+Additional information: [TUM lab page](https://ge.in.tum.de/)
 
 ## Abstract:
 The present study investigates the accurate inference of Reynolds-averaged Navier-Stokes solutions for the compressible flow over aerofoils in two dimensions with a deep neural network. Our approach yields networks that learn to generate precise flow fields for varying body-fitted, structured grids by providing them with an encoding of the corresponding mapping to a canonical space for the solutions. We apply the deep neural network model to a benchmark case of incompressible flow at randomly given angles of attack and Reynolds numbers and achieve an improvement of more than an order of magnitude compared to previous work. Further, for transonic flow cases, the deep neural network model accurately predicts complex flow behaviour at high Reynolds numbers, such as shock wave/boundary layer interaction, and quantitative distributions like pressure coefficient, skin friction coefficient as well as wake total pressure profiles downstream of aerofoils. The proposed deep learning method significantly speeds up the predictions of flow fields and shows promise for enabling fast aerodynamic designs.
